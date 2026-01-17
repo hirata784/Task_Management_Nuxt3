@@ -23,7 +23,7 @@
                         </tr>
                     </tbody>
                     <tbody>
-                        <tr v-for="task in tasks" :key="index">
+                        <tr v-for="(task, index) in tasks" :key="index">
                             <td><input type="checkbox" /></td>
                             <td>{{ task }}</td>
                             <td>未完了</td>
