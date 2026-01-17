@@ -23,10 +23,15 @@
                         </tr>
                     </tbody>
                     <tbody>
-                        <tr v-for="(task, index) in tasks" :key="index">
-                            <td><input type="checkbox" /></td>
-                            <td>{{ task }}</td>
-                            <td>未完了</td>
+                        <tr v-for="task in tasks" :key="task.id">
+                            <td>
+                                <input type="checkbox" v-model="task.is_done" />
+                            </td>
+                            <td>{{ task.title }}</td>
+                            <td>
+                                <label v-if="task.is_done">完了</label>
+                                <label v-else>未完了</label>
+                            </td>
                             <td>2026/1/11</td>
                             <td>
                                 <button class="btn update">更新</button>
@@ -43,8 +48,10 @@
 </template>
 
 <script setup>
-const tasks = ref([]);
-tasks.value.push("買い物に行く", "洗濯をする");
+const tasks = ref([
+    { id: 1, title: "買い物に行く", is_done: false },
+    { id: 2, title: "洗濯をする", is_done: true },
+]);
 </script>
 
 <style scoped>
