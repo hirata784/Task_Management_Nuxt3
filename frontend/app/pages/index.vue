@@ -34,7 +34,12 @@
                             </td>
                             <td>2026/1/11</td>
                             <td>
-                                <button class="btn update">更新</button>
+                                <button
+                                    class="btn update"
+                                    @click="taskUpdate(task)"
+                                >
+                                    更新
+                                </button>
                             </td>
                             <td>
                                 <button class="btn delete">削除</button>
@@ -63,6 +68,17 @@ for (const task of tasks.value) {
         // tasksテーブル：is_done = 0 → false
         task.is_done = false;
     }
+}
+
+// 更新
+async function taskUpdate(task) {
+    const res = await $fetch("http://localhost/api/tasks/" + task.id, {
+        method: "PUT",
+        body: {
+            title: task.title,
+            is_done: task.is_done,
+        },
+    });
 }
 </script>
 
