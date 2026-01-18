@@ -48,10 +48,22 @@
 </template>
 
 <script setup>
-const tasks = ref([
-    { id: 1, title: "買い物に行く", is_done: false },
-    { id: 2, title: "洗濯をする", is_done: true },
-]);
+const tasks = ref([]);
+
+// 初期読み込み
+const { data } = await useFetch("http://localhost/api/tasks");
+tasks.value = data.value.data;
+
+// ステータスのintをbooleanに変換
+for (const task of tasks.value) {
+    if (task.is_done == 1) {
+        // tasksテーブル：is_done = 1 → true
+        task.is_done = true;
+    } else if (task.is_done == 0) {
+        // tasksテーブル：is_done = 0 → false
+        task.is_done = false;
+    }
+}
 </script>
 
 <style scoped>
