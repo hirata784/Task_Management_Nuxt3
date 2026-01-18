@@ -64,9 +64,25 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Task $task)
     {
-        //
+        // ログイン中のユーザーidを取得
+        $user_id = 1;
+        // タスクの更新
+        $update = [
+            'title' => $request->input('title'),
+            'is_done' => $request->input('is_done')
+        ];
+        $item = Task::where('id', $task->id)->update($update);
+        if ($item) {
+            return response()->json([
+                'data' => Task::all()
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Not found',
+            ], 404);
+        }
     }
 
     /**
