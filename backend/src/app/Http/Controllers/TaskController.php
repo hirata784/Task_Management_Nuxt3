@@ -91,8 +91,18 @@ class TaskController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Task $task)
     {
-        //
+        // タスクの削除
+        $item = Task::where('id', $task->id)->delete();
+        if ($item) {
+            return response()->json([
+                'message' => 'Deleted successfully',
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => 'Not found',
+            ], 404);
+        }
     }
 }
