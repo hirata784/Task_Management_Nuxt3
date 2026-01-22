@@ -97,7 +97,7 @@ class TaskController extends Controller
         $item = Task::where('id', $task->id)->delete();
         if ($item) {
             return response()->json([
-                'message' => 'Deleted successfully',
+                'data' => Task::all()
             ], 200);
         } else {
             return response()->json([
