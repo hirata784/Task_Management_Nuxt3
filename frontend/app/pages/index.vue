@@ -42,7 +42,12 @@
                                 </button>
                             </td>
                             <td>
-                                <button class="btn delete">削除</button>
+                                <button
+                                    class="btn delete"
+                                    @click="taskDelete(task)"
+                                >
+                                    削除
+                                </button>
                             </td>
                         </tr>
                     </tbody>
@@ -59,16 +64,7 @@ const tasks = ref([]);
 const { data } = await useFetch("http://localhost/api/tasks");
 tasks.value = data.value.data;
 
-// ステータスのintをbooleanに変換
-for (const task of tasks.value) {
-    if (task.is_done == 1) {
-        // tasksテーブル：is_done = 1 → true
-        task.is_done = true;
-    } else if (task.is_done == 0) {
-        // tasksテーブル：is_done = 0 → false
-        task.is_done = false;
-    }
-}
+statusBoolean();
 
 // 更新
 async function taskUpdate(task) {
@@ -79,6 +75,29 @@ async function taskUpdate(task) {
             is_done: task.is_done,
         },
     });
+}
+
+// 削除
+async function taskDelete(task) {
+    const res = await $fetch("http://localhost/api/tasks/" + task.id, {
+        method: "DELETE",
+    });
+    tasks.value = res.data;
+
+    statusBoolean();
+}
+
+// ステータスのintをbooleanに変換
+function statusBoolean() {
+    for (const task of tasks.value) {
+        if (task.is_done == 1) {
+            // tasksテーブル：is_done = 1 → true
+            task.is_done = true;
+        } else if (task.is_done == 0) {
+            // tasksテーブル：is_done = 0 → false
+            task.is_done = false;
+        }
+    }
 }
 </script>
 
