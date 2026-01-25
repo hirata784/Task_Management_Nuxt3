@@ -6,8 +6,8 @@
         <div class="myTasks">
             <div class="input">
                 <h2>入力フォーム</h2>
-                <input type="text" class="txt" />
-                <button class="btn add">追加</button>
+                <input type="text" class="txt" v-model="taskValue" />
+                <button class="btn add" @click="taskAdd">追加</button>
             </div>
             <div class="list">
                 <h2>タスク一覧</h2>
@@ -59,12 +59,29 @@
 
 <script setup>
 const tasks = ref([]);
+const taskValue = ref("");
 
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
 tasks.value = data.value.data;
 
 statusBoolean();
+
+// 追加
+async function taskAdd() {
+    const res = await $fetch("http://localhost/api/tasks/", {
+        method: "POST",
+        body: {
+            title: taskValue.value,
+            is_done: false,
+        },
+    });
+    // データ変更後すぐ反映
+    tasks.value = res.data;
+    statusBoolean();
+
+    taskValue.value = "";
+}
 
 // 更新
 async function taskUpdate(task) {
@@ -82,8 +99,8 @@ async function taskDelete(task) {
     const res = await $fetch("http://localhost/api/tasks/" + task.id, {
         method: "DELETE",
     });
+    // データ変更後すぐ反映
     tasks.value = res.data;
-
     statusBoolean();
 }
 

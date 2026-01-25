@@ -42,7 +42,7 @@ class TaskController extends Controller
             ]
         );
         return response()->json([
-            'data' => $task
+            'data' => Task::all()
         ], 201);
     }
 
