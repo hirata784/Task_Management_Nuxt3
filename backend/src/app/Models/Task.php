@@ -20,4 +20,10 @@ class Task extends Model
     {
         return $this->belongTo(User::class);
     }
+
+    protected function serializeDate(\DateTimeInterface $date)
+    {
+        // 日本語表示向けにYYYY/MM/DDに変更
+        return $date->format('Y/m/d');
+    }
 }

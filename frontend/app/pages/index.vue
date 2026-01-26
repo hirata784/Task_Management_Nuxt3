@@ -32,7 +32,7 @@
                                 <label v-if="task.is_done">完了</label>
                                 <label v-else>未完了</label>
                             </td>
-                            <td>2026/1/11</td>
+                            <td>{{ task.created_at }}</td>
                             <td>
                                 <button
                                     class="btn update"
@@ -64,7 +64,6 @@ const taskValue = ref("");
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
 tasks.value = data.value.data;
-
 statusBoolean();
 
 // 追加
