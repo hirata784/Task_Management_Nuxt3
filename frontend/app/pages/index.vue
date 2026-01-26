@@ -11,6 +11,9 @@
                     {{ isLoading ? "追加中…" : "追加" }}
                 </button>
                 <div v-if="addError" style="color: red">{{ addError }}</div>
+                <div v-else-if="successMessage" style="color: green">
+                    {{ successMessage }}
+                </div>
             </div>
             <div class="list">
                 <h2>タスク一覧</h2>
@@ -65,6 +68,8 @@ const tasks = ref([]);
 const taskValue = ref("");
 const addError = ref("");
 const isLoading = ref(false);
+const successMessage = ref("");
+const timer = ref(null);
 
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
@@ -77,6 +82,7 @@ async function taskAdd() {
     if (taskValue.value.trim() == "") {
         addError.value = "タスク名を入力してください";
         taskValue.value = "";
+        successMessage.value = "";
         return;
     }
 
@@ -96,6 +102,18 @@ async function taskAdd() {
         // エラー表示を削除
         taskValue.value = "";
         addError.value = "";
+        // 成功メッセージを表示
+        successMessage.value = "タスクの追加に成功しました";
+
+        // すでにタイマーがある場合削除
+        if (timer.value) {
+            clearTimeout(timer.value);
+        }
+        timer.value = setTimeout(() => {
+            // 3秒後にメッセージを破棄
+            successMessage.value = "";
+            timer.value = null;
+        }, 3000);
     } catch (e) {
         addError.value = "タスクの追加に失敗しました";
     } finally {
