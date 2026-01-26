@@ -7,7 +7,10 @@
             <div class="input">
                 <h2>入力フォーム</h2>
                 <input type="text" class="txt" v-model="taskValue" />
-                <button class="btn add" @click="taskAdd">追加</button>
+                <button class="btn add" @click="taskAdd" :disabled="isLoading">
+                    {{ isLoading ? "追加中…" : "追加" }}
+                </button>
+                <div v-if="addError" style="color: red">{{ addError }}</div>
             </div>
             <div class="list">
                 <h2>タスク一覧</h2>
@@ -60,6 +63,8 @@
 <script setup>
 const tasks = ref([]);
 const taskValue = ref("");
+const addError = ref("");
+const isLoading = ref(false);
 
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
@@ -68,18 +73,34 @@ statusBoolean();
 
 // 追加
 async function taskAdd() {
-    const res = await $fetch("http://localhost/api/tasks/", {
-        method: "POST",
-        body: {
-            title: taskValue.value,
-            is_done: false,
-        },
-    });
-    // データ変更後すぐ反映
-    tasks.value = res.data;
-    statusBoolean();
+    // 空白orスペースのみの場合、処理しない
+    if (taskValue.value.trim() == "") {
+        addError.value = "タスク名を入力してください";
+        taskValue.value = "";
+        return;
+    }
 
-    taskValue.value = "";
+    isLoading.value = true;
+
+    try {
+        const res = await $fetch("http://localhost/api/tasks/", {
+            method: "POST",
+            body: {
+                title: taskValue.value,
+                is_done: false,
+            },
+        });
+        // データ変更後すぐ反映
+        tasks.value = res.data;
+        statusBoolean();
+        // エラー表示を削除
+        taskValue.value = "";
+        addError.value = "";
+    } catch (e) {
+        addError.value = "タスクの追加に失敗しました";
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 // 更新
