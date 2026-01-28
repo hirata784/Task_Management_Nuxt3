@@ -11,8 +11,8 @@
                     {{ isLoading ? "追加中…" : "追加" }}
                 </button>
                 <div v-if="addError" style="color: red">{{ addError }}</div>
-                <div v-else-if="successMessage" style="color: green">
-                    {{ successMessage }}
+                <div v-else-if="addSuccess" style="color: green">
+                    {{ addSuccess }}
                 </div>
             </div>
             <div class="list">
@@ -33,7 +33,13 @@
                             <td>
                                 <input type="checkbox" v-model="task.is_done" />
                             </td>
-                            <td>{{ task.title }}</td>
+                            <td>
+                                <input
+                                    type="text"
+                                    class="task-name"
+                                    v-model="task.title"
+                                />
+                            </td>
                             <td>
                                 <label v-if="task.is_done">完了</label>
                                 <label v-else>未完了</label>
@@ -58,6 +64,12 @@
                         </tr>
                     </tbody>
                 </table>
+                <div v-if="updateError" style="color: red">
+                    {{ updateError }}
+                </div>
+                <div v-else-if="updateSuccess" style="color: green">
+                    {{ updateSuccess }}
+                </div>
             </div>
         </div>
     </div>
@@ -67,8 +79,10 @@
 const tasks = ref([]);
 const taskValue = ref("");
 const addError = ref("");
+const updateError = ref("");
 const isLoading = ref(false);
-const successMessage = ref("");
+const addSuccess = ref("");
+const updateSuccess = ref("");
 const timer = ref(null);
 
 // 初期読み込み
@@ -82,7 +96,7 @@ async function taskAdd() {
     if (taskValue.value.trim() == "") {
         addError.value = "タスク名を入力してください";
         taskValue.value = "";
-        successMessage.value = "";
+        addSuccess.value = "";
         return;
     }
 
@@ -103,7 +117,7 @@ async function taskAdd() {
         taskValue.value = "";
         addError.value = "";
         // 成功メッセージを表示
-        successMessage.value = "タスクの追加に成功しました";
+        addSuccess.value = "タスクの追加に成功しました";
 
         // すでにタイマーがある場合削除
         if (timer.value) {
@@ -111,7 +125,7 @@ async function taskAdd() {
         }
         timer.value = setTimeout(() => {
             // 3秒後にメッセージを破棄
-            successMessage.value = "";
+            addSuccess.value = "";
             timer.value = null;
         }, 3000);
     } catch (e) {
@@ -123,13 +137,42 @@ async function taskAdd() {
 
 // 更新
 async function taskUpdate(task) {
-    const res = await $fetch("http://localhost/api/tasks/" + task.id, {
-        method: "PUT",
-        body: {
-            title: task.title,
-            is_done: task.is_done,
-        },
-    });
+    // 空白orスペースのみの場合、処理しない
+    if (task.title.trim() === "") {
+        updateError.value = "タスク名を入力してください";
+        task.title = "";
+        updateSuccess.value = "";
+        return;
+    }
+
+    try {
+        const res = await $fetch("http://localhost/api/tasks/" + task.id, {
+            method: "PUT",
+            body: {
+                title: task.title,
+                is_done: task.is_done,
+            },
+        });
+        // データ変更後すぐ反映
+        tasks.value = res.data;
+        statusBoolean();
+        // エラー表示を削除
+        updateError.value = "";
+        // 成功メッセージを表示
+        updateSuccess.value = "タスクの更新に成功しました";
+
+        // すでにタイマーがある場合削除
+        if (timer.value) {
+            clearTimeout(timer.value);
+        }
+        timer.value = setTimeout(() => {
+            // 3秒後にメッセージを破棄
+            updateSuccess.value = "";
+            timer.value = null;
+        }, 3000);
+    } catch (e) {
+        updateError.value = "タスクの更新に失敗しました";
+    }
 }
 
 // 削除
@@ -209,6 +252,14 @@ td {
 .list-table {
     border-collapse: collapse;
     width: 100%;
+}
+
+.task-name {
+    border: none;
+    outline: none;
+    background-color: palegreen;
+    width: 100%;
+    padding: 10px;
 }
 
 .update {
