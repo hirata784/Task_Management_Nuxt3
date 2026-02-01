@@ -89,8 +89,16 @@
                             </td>
                             <td>
                                 <button
+                                    class="btn cancel"
+                                    @click="taskCancel(task)"
+                                    v-if="editFlag == task.id"
+                                >
+                                    取消
+                                </button>
+                                <button
                                     class="btn delete"
                                     @click="taskDelete(task)"
+                                    v-else
                                 >
                                     削除
                                 </button>
@@ -119,6 +127,7 @@ const addSuccess = ref("");
 const updateSuccess = ref("");
 const timer = ref(null);
 const editFlag = ref("");
+const taskBk = ref([]);
 
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
@@ -153,7 +162,8 @@ async function taskAdd() {
         addError.value = "";
         // 成功メッセージを表示
         addSuccess.value = "タスクの追加に成功しました";
-
+        // バックアップを更新する
+        taskBk.value = JSON.parse(JSON.stringify(tasks.value));
         // すでにタイマーがある場合削除
         if (timer.value) {
             clearTimeout(timer.value);
@@ -168,6 +178,14 @@ async function taskAdd() {
     } finally {
         isLoading.value = false;
     }
+}
+
+// 編集
+async function taskEdit(task) {
+    // 最新バックアップを取得する
+    taskBk.value = JSON.parse(JSON.stringify(tasks.value));
+    // 編集ボタンを押した行に更新ボタンを表示
+    editFlag.value = task.id;
 }
 
 // 更新
@@ -195,7 +213,10 @@ async function taskUpdate(task) {
         updateError.value = "";
         // 成功メッセージを表示
         updateSuccess.value = "タスクの更新に成功しました";
-
+        // 編集モードを解除
+        editFlag.value = "";
+        // バックアップを更新する
+        taskBk.value = JSON.parse(JSON.stringify(tasks.value));
         // すでにタイマーがある場合削除
         if (timer.value) {
             clearTimeout(timer.value);
@@ -217,7 +238,17 @@ async function taskDelete(task) {
     });
     // データ変更後すぐ反映
     tasks.value = res.data;
+    // バックアップを更新する
+    taskBk.value = JSON.parse(JSON.stringify(tasks.value));
     statusBoolean();
+}
+
+// 取消
+async function taskCancel(task) {
+    // 編集モードを解除
+    editFlag.value = "";
+    // 変更前の状態に戻す
+    tasks.value = taskBk.value;
 }
 
 // ステータスのintをbooleanに変換
@@ -231,12 +262,6 @@ function statusBoolean() {
             task.is_done = false;
         }
     }
-}
-
-// 編集
-async function taskEdit(task) {
-    // 編集ボタンを押した行に更新ボタンを表示
-    editFlag.value = task.id;
 }
 </script>
 
@@ -320,6 +345,10 @@ td {
 
 .delete {
     background-color: #fac998;
+}
+
+.cancel {
+    background-color: red;
 }
 
 .btn {
