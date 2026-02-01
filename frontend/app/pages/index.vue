@@ -24,20 +24,45 @@
                             <th>タスク名</th>
                             <th>ステータス</th>
                             <th>作成日</th>
-                            <th>更新</th>
+                            <th>編集</th>
                             <th>削除</th>
                         </tr>
                     </tbody>
                     <tbody>
-                        <tr v-for="task in tasks" :key="task.id">
+                        <!-- 編集ボタンを押すと、背景色が変更。 -->
+                        <tr
+                            v-for="task in tasks"
+                            :key="task.id"
+                            :class="editFlag == task.id ? 'yellow' : ''"
+                        >
+                            <!-- 編集ボタンを押すと、チェックボックス操作可能になる。 -->
                             <td>
-                                <input type="checkbox" v-model="task.is_done" />
+                                <input
+                                    type="checkbox"
+                                    v-model="task.is_done"
+                                    v-if="editFlag == task.id"
+                                />
+                                <input
+                                    type="checkbox"
+                                    v-model="task.is_done"
+                                    disabled="none"
+                                    v-else
+                                />
                             </td>
+                            <!-- 編集ボタンを押すと、入力可能になる。 -->
                             <td>
                                 <input
                                     type="text"
-                                    class="task-name"
+                                    class="task-name yellow"
                                     v-model="task.title"
+                                    v-if="editFlag == task.id"
+                                />
+                                <input
+                                    type="text"
+                                    class="task-name green"
+                                    v-model="task.title"
+                                    readonly
+                                    v-else
                                 />
                             </td>
                             <td>
@@ -45,12 +70,21 @@
                                 <label v-else>未完了</label>
                             </td>
                             <td>{{ task.created_at }}</td>
+                            <!-- 編集ボタンを押すと、ボタンの表示が変更。 -->
                             <td>
                                 <button
                                     class="btn update"
                                     @click="taskUpdate(task)"
+                                    v-if="editFlag == task.id"
                                 >
                                     更新
+                                </button>
+                                <button
+                                    class="btn edit"
+                                    @click="taskEdit(task)"
+                                    v-else
+                                >
+                                    編集
                                 </button>
                             </td>
                             <td>
@@ -84,6 +118,7 @@ const isLoading = ref(false);
 const addSuccess = ref("");
 const updateSuccess = ref("");
 const timer = ref(null);
+const editFlag = ref("");
 
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
@@ -197,6 +232,12 @@ function statusBoolean() {
         }
     }
 }
+
+// 編集
+async function taskEdit(task) {
+    // 編集ボタンを押した行に更新ボタンを表示
+    editFlag.value = task.id;
+}
 </script>
 
 <style scoped>
@@ -207,6 +248,14 @@ h1 {
 
 h2 {
     margin: 0;
+}
+
+.yellow {
+    background-color: lightyellow;
+}
+
+.green {
+    background-color: palegreen;
 }
 
 td {
@@ -257,13 +306,16 @@ td {
 .task-name {
     border: none;
     outline: none;
-    background-color: palegreen;
     width: 100%;
     padding: 10px;
 }
 
 .update {
     background-color: #fa98fa;
+}
+
+.edit {
+    background-color: #9898fa;
 }
 
 .delete {
