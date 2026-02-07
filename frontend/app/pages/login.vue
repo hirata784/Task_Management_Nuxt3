@@ -11,6 +11,7 @@
                     <input
                         type="text"
                         class="txt"
+                        v-model="mail"
                         placeholder="メールアドレスを入力"
                     />
                 </div>
@@ -19,16 +20,34 @@
                     <input
                         type="password"
                         class="txt"
+                        v-model="password"
                         placeholder="パスワードを入力"
                     />
                 </div>
                 <div class="login">
-                    <button class="login-btn">ログイン</button>
+                    <button class="login-btn" @click="login">ログイン</button>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+<script setup>
+const mail = ref("");
+const password = ref("");
+// ログインボタン押下
+async function login() {
+    const res = await $fetch("http://localhost/api/auth/login", {
+        method: "POST",
+        body: {
+            email: mail.value,
+            password: password.value,
+        },
+    });
+    // トークンを保存
+    localStorage.setItem("token", res.access_token);
+}
+</script>
 
 <style scoped>
 h1 {
