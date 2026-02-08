@@ -142,6 +142,10 @@ onMounted(() => {
     const token = localStorage.getItem("token");
     // tokenがあればtrue, なければfalse
     isLoggedIn.value = !!token;
+    //  tokenがなければ、ログイン画面へ戻る
+    if (token == null) {
+        navigateTo("/login");
+    }
 });
 
 // 追加
@@ -280,6 +284,8 @@ async function logout() {
 
         localStorage.removeItem("token");
         isLoggedIn.value = false;
+        // ログイン画面へ遷移
+        navigateTo("/login");
     } catch (e) {
         alert("ログアウトに失敗しました。");
     }

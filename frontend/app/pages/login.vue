@@ -35,6 +35,15 @@
 <script setup>
 const mail = ref("");
 const password = ref("");
+
+onMounted(() => {
+    const token = localStorage.getItem("token");
+    //  tokenがあれば、タスク管理画面へ戻る
+    if (token != null) {
+        navigateTo("/");
+    }
+});
+
 // ログインボタン押下
 async function login() {
     const res = await $fetch("http://localhost/api/auth/login", {
@@ -46,6 +55,8 @@ async function login() {
     });
     // トークンを保存
     localStorage.setItem("token", res.access_token);
+    // タスク一覧画面へ遷移
+    navigateTo("/");
 }
 </script>
 
