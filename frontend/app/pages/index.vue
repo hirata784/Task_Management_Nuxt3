@@ -2,6 +2,9 @@
     <div class="task">
         <header class="header">
             <h1>My Tasks</h1>
+            <button v-if="isLoggedIn" class="logoutBtn" @click="logout">
+                ログアウト
+            </button>
         </header>
         <div class="myTasks">
             <div class="input">
@@ -128,11 +131,18 @@ const updateSuccess = ref("");
 const timer = ref(null);
 const editFlag = ref("");
 const taskBk = ref([]);
+const isLoggedIn = ref(false);
 
 // 初期読み込み
 const { data } = await useFetch("http://localhost/api/tasks");
 tasks.value = data.value.data;
 statusBoolean();
+
+onMounted(() => {
+    const token = localStorage.getItem("token");
+    // tokenがあればtrue, なければfalse
+    isLoggedIn.value = !!token;
+});
 
 // 追加
 async function taskAdd() {
@@ -251,6 +261,30 @@ async function taskCancel(task) {
     tasks.value = taskBk.value;
 }
 
+// ログアウト
+async function logout() {
+    const token = localStorage.getItem("token");
+    // すでにログアウト済みの場合、処理しない
+    if (!token) {
+        isLoggedIn.value = false;
+        return;
+    }
+
+    try {
+        const res = await $fetch("http://localhost/api/auth/logout", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        localStorage.removeItem("token");
+        isLoggedIn.value = false;
+    } catch (e) {
+        alert("ログアウトに失敗しました。");
+    }
+}
+
 // ステータスのintをbooleanに変換
 function statusBoolean() {
     for (const task of tasks.value) {
@@ -268,7 +302,6 @@ function statusBoolean() {
 <style scoped>
 h1 {
     margin: 0;
-    color: #fff;
 }
 
 h2 {
@@ -293,8 +326,18 @@ td {
 }
 
 .header {
+    display: flex;
+    justify-content: space-between;
     background-color: #1f331f;
+    color: #fff;
     padding: 10px;
+}
+
+.logoutBtn {
+    color: #fff;
+    background-color: #1f331f;
+    border: none;
+    font-size: 18px;
 }
 
 .myTasks {
