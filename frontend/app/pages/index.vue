@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="list">
-                <h2>タスク一覧</h2>
+                <h2>{{ user.name }}さんのタスク一覧</h2>
                 <table class="list-table" border="1" rules="rows">
                     <tbody>
                         <tr>
@@ -132,19 +132,36 @@ const timer = ref(null);
 const editFlag = ref("");
 const taskBk = ref([]);
 const isLoggedIn = ref(false);
+const user = ref({});
 
-// 初期読み込み
-const { data } = await useFetch("http://localhost/api/tasks");
-tasks.value = data.value.data;
-statusBoolean();
-
-onMounted(() => {
+onMounted(async () => {
     const token = localStorage.getItem("token");
     // tokenがあればtrue, なければfalse
     isLoggedIn.value = !!token;
     //  tokenがなければ、ログイン画面へ戻る
     if (token == null) {
         navigateTo("/login");
+    }
+
+    try {
+        // ユーザー取得
+        const userRes = await $fetch("http://localhost/api/auth/user", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        user.value = userRes;
+
+        // タスク取得
+        const taskRes = await $fetch("http://localhost/api/tasks", {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        tasks.value = taskRes.data;
+        statusBoolean();
+    } catch (error) {
+        alert("ログインユーザーの取得に失敗しました。");
     }
 });
 
