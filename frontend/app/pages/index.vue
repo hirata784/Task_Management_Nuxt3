@@ -174,12 +174,15 @@ async function taskAdd() {
         addSuccess.value = "";
         return;
     }
-
+    const token = localStorage.getItem("token");
     isLoading.value = true;
 
     try {
         const res = await $fetch("http://localhost/api/tasks/", {
             method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             body: {
                 title: taskValue.value,
                 is_done: false,
@@ -228,10 +231,14 @@ async function taskUpdate(task) {
         updateSuccess.value = "";
         return;
     }
+    const token = localStorage.getItem("token");
 
     try {
         const res = await $fetch("http://localhost/api/tasks/" + task.id, {
             method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             body: {
                 title: task.title,
                 is_done: task.is_done,
@@ -264,8 +271,12 @@ async function taskUpdate(task) {
 
 // 削除
 async function taskDelete(task) {
+    const token = localStorage.getItem("token");
     const res = await $fetch("http://localhost/api/tasks/" + task.id, {
         method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
     });
     // データ変更後すぐ反映
     tasks.value = res.data;

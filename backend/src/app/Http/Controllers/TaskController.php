@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
@@ -15,7 +16,7 @@ class TaskController extends Controller
     public function index()
     {
         // ログイン中のユーザーidを取得
-        $user_id = 1;
+        $user_id = Auth::guard('api')->user()->id;
         // ログインユーザーのタスクのみ取得
         $tasks = Task::where('user_id', $user_id)->get();
         return response()->json([
@@ -32,7 +33,7 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         // ログイン中のユーザーidを取得
-        $user_id = 1;
+        $user_id = Auth::guard('api')->id();
         // ログインユーザーのタスク追加
         $task = Task::create(
             [
@@ -41,8 +42,10 @@ class TaskController extends Controller
                 'is_done' => $request->input('is_done')
             ]
         );
+        // ログインユーザーのタスクのみ取得
+        $tasks = Task::where('user_id', $user_id)->get();
         return response()->json([
-            'data' => Task::all()
+            'data' => $tasks
         ], 201);
     }
 
@@ -67,16 +70,18 @@ class TaskController extends Controller
     public function update(Request $request, Task $task)
     {
         // ログイン中のユーザーidを取得
-        $user_id = 1;
+        $user_id = Auth::guard('api')->id();
         // タスクの更新
         $update = [
             'title' => $request->input('title'),
             'is_done' => $request->input('is_done')
         ];
         $item = Task::where('id', $task->id)->update($update);
+        // ログインユーザーのタスクのみ取得
+        $tasks = Task::where('user_id', $user_id)->get();
         if ($item) {
             return response()->json([
-                'data' => Task::all()
+                'data' => $tasks
             ], 200);
         } else {
             return response()->json([
@@ -93,11 +98,15 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
+        // ログイン中のユーザーidを取得
+        $user_id = Auth::guard('api')->id();
         // タスクの削除
         $item = Task::where('id', $task->id)->delete();
+        // ログインユーザーのタスクのみ取得
+        $tasks = Task::where('user_id', $user_id)->get();
         if ($item) {
             return response()->json([
-                'data' => Task::all()
+                'data' => $tasks
             ], 200);
         } else {
             return response()->json([

@@ -26,5 +26,17 @@ class TasksTableSeeder extends Seeder
             'is_done' => true
         ];
         DB::table('tasks')->insert($param);
+                $param = [
+            'user_id' => 2,
+            'title' => 'ランニングする',
+            'is_done' => false
+        ];
+        DB::table('tasks')->insert($param);
+        $param = [
+            'user_id' => 2,
+            'title' => '料理をする',
+            'is_done' => true
+        ];
+        DB::table('tasks')->insert($param);
     }
 }
